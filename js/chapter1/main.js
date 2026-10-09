@@ -392,12 +392,18 @@ dom.resetButton.addEventListener("touchend", handleReset);
 // Bersihkan kamera & media saat meninggalkan halaman
 export function releaseCameraAndMedia() {
     try {
+        document.querySelectorAll('audio').forEach((a) => {
+            try {
+                a.pause();
+                a.currentTime = 0;
+            } catch (e) {}
+        });
         document.querySelectorAll('video').forEach((v) => {
             if (v.srcObject && typeof v.srcObject.getTracks === 'function') {
                 v.srcObject.getTracks().forEach((track) => track.stop());
                 v.srcObject = null;
             }
-            try { v.pause(); } catch (e) {}
+            try { v.pause(); v.currentTime = 0; } catch (e) {}
         });
         const scene = document.querySelector('a-scene');
         if (scene && scene.systems && scene.systems['mindar-image-system']) {
@@ -409,11 +415,30 @@ export function releaseCameraAndMedia() {
 const homeBtn = document.getElementById('homeButton');
 if (homeBtn) {
     homeBtn.addEventListener('click', () => {
+        restartFromBeginning();
         releaseCameraAndMedia();
     });
 }
 window.addEventListener('pagehide', releaseCameraAndMedia);
 window.addEventListener('beforeunload', releaseCameraAndMedia);
+
+// Tangani pemulihan dari BFCache pada browser mobile
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        console.log('🔄 [BFCache Restore] Chapter 1 dipulihkan dari cache, mereset state & audio...');
+        restartFromBeginning();
+        try {
+            document.querySelectorAll('audio').forEach((a) => {
+                a.pause();
+                a.currentTime = 0;
+            });
+            document.querySelectorAll('video').forEach((v) => {
+                v.pause();
+                v.currentTime = 0;
+            });
+        } catch (e) {}
+    }
+});
 
 // -----------------------------------------------------------------------------
 // 7. TESTING & DIRECT JUMP UTILITIES
