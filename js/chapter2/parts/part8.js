@@ -161,7 +161,14 @@ export function handleNavigateToQuiz() {
             q1Salah.play().catch(() => {});
         }
         if (q1Sound) {
-            try { q1Sound.load(); } catch (e) {}
+            q1Sound.muted = false;
+            q1Sound.volume = 1.0;
+            const p = q1Sound.play();
+            if (p !== undefined) {
+                p.then(() => {}).catch(() => {
+                    try { q1Sound.load(); } catch (err) {}
+                });
+            }
         }
     } catch (err) {
         console.warn('⚠️ Quiz 1 warm up warning:', err);
