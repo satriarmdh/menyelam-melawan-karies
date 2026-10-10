@@ -1,5 +1,6 @@
 import { state, dom, allVideos, videos } from "./state.js";
 import { preloadPart, ensurePartLoaded, releasePartVideos } from "./loader.js";
+import { unlockAudioContext, stopAllWebAudio } from '../audioManager.js';
 
 // AREA IMPORT FUNGSI PART
 import { playPart1, initPart1 } from './parts/part1.js';
@@ -227,14 +228,9 @@ function executeStartChapter2() {
         dom.statusBar.classList.remove("tracking", "finished");
     }
 
-    // Buka kunci WebAudio context secara senyap jika didukung browser
-    try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-            if (!window.__globalAudioCtx) window.__globalAudioCtx = new AudioCtx();
-            if (window.__globalAudioCtx.state === 'suspended') window.__globalAudioCtx.resume();
-        }
-    } catch (e) {}
+    // Buka kunci hardware WebAudio session permanen (bebas autoplay iOS Safari)
+    unlockAudioContext();
+    stopAllWebAudio();
 
     // Pastikan seluruh audio narasi & kuis dalam kondisi siap dan diam di awal
     const allSounds = Array.from(document.querySelectorAll('audio')).filter(Boolean);
@@ -325,6 +321,7 @@ export function replayPart(partNumber) {
 }
 
 export function restartFromBeginning() {
+    stopAllWebAudio();
     const allContainers = [
         dom.containerPart1, dom.containerPart2, dom.containerPart3,
         dom.containerPart4, dom.containerPart5, dom.containerPart6,
@@ -372,6 +369,7 @@ dom.resetButton.addEventListener("touchend", handleReset);
 // Bersihkan kamera & media saat meninggalkan halaman
 export function releaseCameraAndMedia() {
     try {
+        stopAllWebAudio();
         document.querySelectorAll('audio').forEach((a) => {
             try {
                 a.pause();
@@ -408,6 +406,7 @@ window.addEventListener('pageshow', (event) => {
         console.log('🔄 [BFCache Restore] Chapter 2 dipulihkan dari cache, mereset state & audio...');
         restartFromBeginning();
         try {
+            stopAllWebAudio();
             document.querySelectorAll('audio').forEach((a) => {
                 a.pause();
                 a.currentTime = 0;

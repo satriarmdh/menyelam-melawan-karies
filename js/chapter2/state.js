@@ -1,3 +1,5 @@
+import { createWebAudioPlayer } from '../audioManager.js';
+
 export const state = {
     videosLoaded: 0,
     videosBuffered: 0,
@@ -51,14 +53,14 @@ export const dom = {
     target7: document.getElementById('target7'),
     target8: document.getElementById('target8'),
     
-    soundV1: document.getElementById('sound-v1'),
-    soundV2: document.getElementById('sound-v2'),
-    soundV3: document.getElementById('sound-v3'),
-    soundV4: document.getElementById('sound-v4'),
-    soundV5: document.getElementById('sound-v5'),
-    soundV6: document.getElementById('sound-v6'),
-    soundV7: document.getElementById('sound-v7'),
-    soundV8: document.getElementById('sound-v8'),
+    soundV1: createWebAudioPlayer('sound-v1'),
+    soundV2: createWebAudioPlayer('sound-v2'),
+    soundV3: createWebAudioPlayer('sound-v3'),
+    soundV4: createWebAudioPlayer('sound-v4'),
+    soundV5: createWebAudioPlayer('sound-v5'),
+    soundV6: createWebAudioPlayer('sound-v6'),
+    soundV7: createWebAudioPlayer('sound-v7'),
+    soundV8: createWebAudioPlayer('sound-v8'),
 
     btnPlayPart8_3D: document.getElementById('btn-play-part8-3d'),
     btnPlayPart8_Plane: document.getElementById('btn-play-part8-plane')

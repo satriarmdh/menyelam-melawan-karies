@@ -1,5 +1,6 @@
 import { dom, videos } from './state.js';
 import { getMediaUrl } from '../cdnConfig.js';
+import { preloadAudio } from '../audioManager.js';
 
 // Konfigurasi URL Bersih via Supabase CDN
 export const PART_CONFIG = {
@@ -95,6 +96,7 @@ export function preloadPart(partNum) {
     console.log(`📥 [Chapter 1 Prefetch] Memulai background download Part ${partNum}...`);
 
     if (config.audio) {
+        preloadAudio(config.audio.src);
         const aEl = document.getElementById(config.audio.id);
         if (aEl && (!aEl.src || aEl.src === '' || aEl.src.endsWith('#'))) {
             aEl.src = config.audio.src;
@@ -137,3 +139,9 @@ export function releasePartVideos(partNum) {
         });
     }
 }
+
+// Preload audio Part 1 segera di awal agar siap putar dengan 0ms latensi
+if (PART_CONFIG[1] && PART_CONFIG[1].audio) {
+    preloadAudio(PART_CONFIG[1].audio.src);
+}
+
