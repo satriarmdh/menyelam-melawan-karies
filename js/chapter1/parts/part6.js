@@ -55,6 +55,10 @@ async function startPart6Videos() {
         }
     });
     
+    // Pastikan video elemen part 6 kembali terlihat jika sebelumnya sempat disembunyikan
+    const elElemen6 = document.getElementById('video-elemen-part6');
+    if (elElemen6) elElemen6.setAttribute('visible', true);
+
     const playPromises = videos.part6.map(async (v) => {
         if (!v) return;
         try {
@@ -66,9 +70,27 @@ async function startPart6Videos() {
     });
     await Promise.all(playPromises);
     
-    // 3. TEKNIK FREEZE FRAME
+    // 3. TEKNIK FREEZE FRAME (khusus elemen-part6: jangan difreeze, tapi sembunyikan saat selesai 10s)
     videos.part6.forEach(v => {
         if (!v) return;
+
+        if (v.id === 'vid-elemen-part6') {
+            const hideElemen = () => {
+                const el = document.getElementById('video-elemen-part6');
+                if (el) el.setAttribute('visible', false);
+                v.pause();
+                console.log('✨ [Part 6] Video #vid-elemen-part6 selesai durasi (10s) dan langsung menghilang.');
+            };
+            v.addEventListener('ended', hideElemen, { once: true });
+            v.addEventListener('timeupdate', function handleElemenEnd() {
+                if (this.duration && (this.duration - this.currentTime <= 0.25)) {
+                    hideElemen();
+                    this.removeEventListener('timeupdate', handleElemenEnd);
+                }
+            });
+            return;
+        }
+
         v.addEventListener('timeupdate', function preventBlackScreen() {
             if (this.duration && (this.duration - this.currentTime <= 0.5)) {
                 this.pause(); 

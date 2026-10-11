@@ -1034,13 +1034,20 @@ AFRAME.registerShader('chromakey-gray', {
                     vec3 keyColor = vec3(0.28627, 0.36863, 0.41961);
                     float dist = distance(color.rgb, keyColor);
 
-                    // Transisi halus presisi & feathered (0.038 - 0.12)
-                    float alpha = smoothstep(0.038, 0.12, dist);
+                    // Transisi halus presisi ultra-clean (0.09 - 0.34)
+                    // Mencegah piksel abu-abu semi-transparan mengambang sebagai border
+                    float alpha = smoothstep(0.09, 0.34, dist);
 
-                    // Hard-cut pengaman untuk piksel latar belakang murni
-                    if (dist < 0.035) {
+                    // Hard-cut pengaman untuk piksel latar belakang murni & noise kompresi video
+                    if (dist < 0.08) {
                         alpha = 0.0;
                     }
+
+                    // Edge-fade proteksi pada 4 sisi tepi bingkai UV (mencegah garis batas kotak video)
+                    float edgeMargin = 0.005;
+                    float edgeFade = smoothstep(0.0, edgeMargin, vUv.x) * smoothstep(1.0, 1.0 - edgeMargin, vUv.x)
+                                   * smoothstep(0.0, edgeMargin, vUv.y) * smoothstep(1.0, 1.0 - edgeMargin, vUv.y);
+                    alpha *= edgeFade;
 
                     // Perlindungan area gelap / outline teks dan mata
                     float darkFactor = smoothstep(0.02, 0.08, max(max(color.r, color.g), color.b));
@@ -1048,10 +1055,11 @@ AFRAME.registerShader('chromakey-gray', {
 
                     vec3 finalColor = color.rgb;
 
-                    // Despill lembut di tepian semi-transparan untuk hilangkan sisa halo abu-abu/kebiruan
-                    if (alpha > 0.0 && alpha < 0.98) {
-                        float spillWeight = 1.0 - smoothstep(0.60, 0.98, alpha);
-                        finalColor = mix(finalColor, clamp(finalColor * 1.1, 0.0, 1.0), spillWeight * 0.4);
+                    // Unmultiply / De-spill matte recovery:
+                    // Menghilangkan 100% sisa tint abu-abu di tepian balon dialog & gelembung
+                    if (alpha > 0.01 && alpha < 0.99) {
+                        vec3 recovered = (finalColor - (1.0 - alpha) * keyColor) / max(alpha, 0.10);
+                        finalColor = clamp(recovered, 0.0, 1.0);
                     }
 
                     gl_FragColor = vec4(finalColor, alpha);
