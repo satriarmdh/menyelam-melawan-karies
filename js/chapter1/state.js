@@ -94,7 +94,7 @@ export const videos = {
     ],
     part6: [
         document.getElementById('vid-kapal6'), document.getElementById('vid-mascot2-6'),
-        document.getElementById('vid-mascot6')
+        document.getElementById('vid-mascot6'), document.getElementById('vid-elemen-part6')
     ],
     part7: [
         document.getElementById('vid-coral7'), document.getElementById('vid-laut7'),

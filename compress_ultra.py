@@ -60,7 +60,7 @@ def main():
     output_folder = "compressed_ultra-videos"
     
     # Dapatkan semua file video
-    video_extensions = ['.mp4', '.MP4', '.avi', '.mov', '.mkv']
+    video_extensions = ['.mp4', '.MP4', '.avi', '.mov', '.MOV', '.mkv']
     
     # List untuk menyimpan pasangan (input_path, output_path)
     video_tasks = []

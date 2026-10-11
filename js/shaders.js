@@ -997,4 +997,105 @@ AFRAME.registerShader('chromakey-teks-part6', {
 // Alias chromakey-lavender
 AFRAME.registerShader('chromakey-lavender', AFRAME.shaders['chromakey-score']);
 
+// CHROMAKEY Shader - Khusus Latar Abu-abu/Slate elemen-part6 (RGB: 73, 94, 107 / #495E6B)
+AFRAME.registerShader('chromakey-gray', {
+    schema: { src: {type: 'map'} },
+    init: function(data) {
+        let el = data.src;
+        if (typeof el === 'string') {
+            el = document.querySelector(el) || document.getElementById(el.replace('#', ''));
+        }
+        const videoTexture = new THREE.VideoTexture(el || data.src);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBAFormat;
+        videoTexture.generateMipmaps = false;
+        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+        this.material = new THREE.ShaderMaterial({
+            uniforms: { tex: {value: videoTexture} },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tex;
+                varying vec2 vUv;
+
+                void main() {
+                    vec4 color = texture2D(tex, vUv);
+
+                    // Target background color abu-abu/slate elemen-part6 (RGB: 73, 94, 107 / #495E6B)
+                    // Normalisasi: 73.0/255.0 = 0.28627, 94.0/255.0 = 0.36863, 107.0/255.0 = 0.41961
+                    vec3 keyColor = vec3(0.28627, 0.36863, 0.41961);
+                    float dist = distance(color.rgb, keyColor);
+
+                    // Transisi halus presisi & feathered (0.038 - 0.12)
+                    float alpha = smoothstep(0.038, 0.12, dist);
+
+                    // Hard-cut pengaman untuk piksel latar belakang murni
+                    if (dist < 0.035) {
+                        alpha = 0.0;
+                    }
+
+                    // Perlindungan area gelap / outline teks dan mata
+                    float darkFactor = smoothstep(0.02, 0.08, max(max(color.r, color.g), color.b));
+                    alpha = mix(1.0, alpha, darkFactor);
+
+                    vec3 finalColor = color.rgb;
+
+                    // Despill lembut di tepian semi-transparan untuk hilangkan sisa halo abu-abu/kebiruan
+                    if (alpha > 0.0 && alpha < 0.98) {
+                        float spillWeight = 1.0 - smoothstep(0.60, 0.98, alpha);
+                        finalColor = mix(finalColor, clamp(finalColor * 1.1, 0.0, 1.0), spillWeight * 0.4);
+                    }
+
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            blending: THREE.NormalBlending
+        });
+        this.material.map = videoTexture;
+    },
+    update: function(data) {
+        if (data.src) {
+            let el = data.src;
+            if (typeof el === 'string') el = document.querySelector(el);
+            if (el) {
+                const videoTexture = new THREE.VideoTexture(el);
+                videoTexture.minFilter = THREE.LinearFilter;
+                videoTexture.magFilter = THREE.LinearFilter;
+                videoTexture.format = THREE.RGBAFormat;
+                videoTexture.generateMipmaps = false;
+                videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+                videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+                if (this.material && this.material.uniforms && this.material.uniforms.tex) {
+                    this.material.uniforms.tex.value = videoTexture;
+                    this.material.map = videoTexture;
+                    this.material.needsUpdate = true;
+                }
+            }
+        }
+    },
+    tick: function() {
+        if (this.material && this.material.uniforms && this.material.uniforms.tex && this.material.uniforms.tex.value) {
+            const t = this.material.uniforms.tex.value;
+            if (t.image && t.image.readyState >= 2 && !t.image.paused) {
+                t.needsUpdate = true;
+            }
+        }
+    }
+});
+
+// Alias chromakey-abu
+AFRAME.registerShader('chromakey-abu', AFRAME.shaders['chromakey-gray']);
+
+
 
