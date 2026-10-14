@@ -1,4 +1,5 @@
 raw-videos/
+.agents/
 sounds/**/raw-sounds
 start_server.bat
 stop_server.bat
