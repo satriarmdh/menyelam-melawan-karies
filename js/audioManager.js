@@ -44,6 +44,8 @@ export function unlockAudioContext() {
     }
 }
 
+const loadingPromises = new Map();
+
 /**
  * Mengambil dan mendecode file audio ke AudioBuffer (dengan cache memori)
  * Kompatibel dengan semua versi WebKit / Safari (Promise & Callback syntax)
@@ -53,45 +55,68 @@ export async function loadAudioBuffer(url) {
     if (audioBufferCache.has(url)) {
         return audioBufferCache.get(url);
     }
+    if (loadingPromises.has(url)) {
+        return loadingPromises.get(url);
+    }
+
     const ctx = getAudioContext();
     if (!ctx) return null;
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const arrayBuffer = await response.arrayBuffer();
-
-        const audioBuffer = await new Promise((resolve, reject) => {
-            let isResolved = false;
+    const promise = (async () => {
+        try {
+            let response;
             try {
-                const res = ctx.decodeAudioData(
-                    arrayBuffer,
-                    (buf) => {
-                        if (!isResolved) {
-                            isResolved = true;
-                            resolve(buf);
-                        }
-                    },
-                    (err) => {
-                        if (!isResolved) {
-                            isResolved = true;
-                            reject(err);
-                        }
-                    }
-                );
-                if (res && typeof res.then === 'function') {
-                    res.then(resolve).catch(reject);
-                }
-            } catch (err) {
-                reject(err);
+                response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            } catch (firstErr) {
+                // Jika terjadi tabrakan disk cache (ERR_CACHE_OPERATION_NOT_SUPPORTED / TypeError: Failed to fetch),
+                // bypass disk cache lock dengan mode 'no-store' langsung ke network
+                console.warn(`⚠️ [AudioManager] Fetch default gagal untuk ${url} (${firstErr.message}), mencoba ulang dengan cache no-store...`);
+                response = await fetch(url, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
 
-        audioBufferCache.set(url, audioBuffer);
-        return audioBuffer;
-    } catch (err) {
-        console.warn(`⚠️ [AudioManager] Gagal decode audio via WebAudio (${url}):`, err);
-        return null;
+            const arrayBuffer = await response.arrayBuffer();
+
+            const audioBuffer = await new Promise((resolve, reject) => {
+                let isResolved = false;
+                try {
+                    const res = ctx.decodeAudioData(
+                        arrayBuffer,
+                        (buf) => {
+                            if (!isResolved) {
+                                isResolved = true;
+                                resolve(buf);
+                            }
+                        },
+                        (err) => {
+                            if (!isResolved) {
+                                isResolved = true;
+                                reject(err);
+                            }
+                        }
+                    );
+                    if (res && typeof res.then === 'function') {
+                        res.then(resolve).catch(reject);
+                    }
+                } catch (err) {
+                    reject(err);
+                }
+            });
+
+            audioBufferCache.set(url, audioBuffer);
+            return audioBuffer;
+        } catch (err) {
+            console.warn(`⚠️ [AudioManager] Gagal decode audio via WebAudio (${url}):`, err);
+            return null;
+        }
+    })();
+
+    loadingPromises.set(url, promise);
+    try {
+        return await promise;
+    } finally {
+        loadingPromises.delete(url);
     }
 }
 

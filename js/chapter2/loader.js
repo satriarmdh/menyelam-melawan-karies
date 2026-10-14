@@ -105,8 +105,7 @@ export function preloadPart(partNum) {
         const aEl = document.getElementById(config.audio.id);
         if (aEl && (!aEl.src || aEl.src === '' || aEl.src.endsWith('#'))) {
             aEl.src = config.audio.src;
-            aEl.preload = 'auto';
-            aEl.load();
+            aEl.preload = 'none';
         }
     }
 
