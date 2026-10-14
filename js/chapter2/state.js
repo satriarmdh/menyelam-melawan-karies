@@ -70,7 +70,8 @@ export const videos = {
     part1: [
         document.getElementById('vid-bakteri-part1-v1'), document.getElementById('vid-balon-bebek-part1-v1'),
         document.getElementById('vid-kolam-renang-part1-v1'), document.getElementById('vid-mascot-part1-v1'),
-        document.getElementById('vid-muntah-part1-v1'), document.getElementById('vid-orang-gigi-part1-v1')
+        document.getElementById('vid-muntah-part1-v1'), document.getElementById('vid-orang-gigi-part1-v1'),
+        document.getElementById('vid-elemen-part1')
     ],
     part2: [
         document.getElementById('vid-muntah-part2-v1'), document.getElementById('vid-orang-makan-part2-v1'),

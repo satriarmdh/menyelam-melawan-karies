@@ -11,7 +11,8 @@ export const PART_CONFIG = {
             { id: 'vid-kolam-renang-part1-v1', src: getMediaUrl('./compressed_ultra-videos/chapter2/part1/kolam renang.mp4') },
             { id: 'vid-mascot-part1-v1', src: getMediaUrl('./compressed_ultra-videos/chapter2/part1/mascot.mp4') },
             { id: 'vid-muntah-part1-v1', src: getMediaUrl('./compressed_ultra-videos/chapter2/part1/muntah.mp4') },
-            { id: 'vid-orang-gigi-part1-v1', src: getMediaUrl('./compressed_ultra-videos/chapter2/part1/orang gigi.mp4') }
+            { id: 'vid-orang-gigi-part1-v1', src: getMediaUrl('./compressed_ultra-videos/chapter2/part1/orang gigi.mp4') },
+            { id: 'vid-elemen-part1', src: getMediaUrl('./compressed_ultra-videos/chapter2/part1/elemen-part1.mp4') }
         ],
         audio: { id: 'sound-v1', src: getMediaUrl('./sounds/chapter2/output-sounds/sound-v1.MP3') }
     },

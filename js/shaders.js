@@ -995,9 +995,11 @@ AFRAME.registerShader('chromakey-teks-part6', {
 });
 
 // Alias chromakey-lavender
-AFRAME.registerShader('chromakey-lavender', AFRAME.shaders['chromakey-score']);
+if (AFRAME.shaders && AFRAME.shaders['chromakey-score']) {
+    AFRAME.shaders['chromakey-lavender'] = AFRAME.shaders['chromakey-score'];
+}
 
-// CHROMAKEY Shader - Khusus Latar Abu-abu/Slate elemen-part6 (RGB: 73, 94, 107 / #495E6B)
+// CHROMAKEY Shader - Khusus Latar Abu-abu/Slate elemen-part1 (RGB: 73, 94, 107 / #495E6B)
 AFRAME.registerShader('chromakey-gray', {
     schema: { src: {type: 'map'} },
     init: function(data) {
@@ -1103,7 +1105,9 @@ AFRAME.registerShader('chromakey-gray', {
 });
 
 // Alias chromakey-abu
-AFRAME.registerShader('chromakey-abu', AFRAME.shaders['chromakey-gray']);
+if (AFRAME.shaders && AFRAME.shaders['chromakey-gray']) {
+    AFRAME.shaders['chromakey-abu'] = AFRAME.shaders['chromakey-gray'];
+}
 
 
 

@@ -55,8 +55,7 @@ export const PART_CONFIG = {
         videos: [
             { id: 'vid-kapal6', src: getMediaUrl('./compressed_ultra-videos/chapter1/part6/KAPAL SELAM-v6.mp4') },
             { id: 'vid-mascot2-6', src: getMediaUrl('./compressed_ultra-videos/chapter1/part6/mascot2.mp4') },
-            { id: 'vid-mascot6', src: getMediaUrl('./compressed_ultra-videos/chapter1/part6/ORANG MASCOT-v6.mp4') },
-            { id: 'vid-elemen-part6', src: getMediaUrl('./compressed_ultra-videos/chapter1/part6/elemen-part6.mp4') }
+            { id: 'vid-mascot6', src: getMediaUrl('./compressed_ultra-videos/chapter1/part6/ORANG MASCOT-v6.mp4') }
         ],
         audio: { id: 'sound-v6', src: getMediaUrl('./sounds/chapter1/output-sounds/sound-v6.MP3') }
     },

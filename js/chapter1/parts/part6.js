@@ -55,13 +55,6 @@ async function startPart6Videos() {
         }
     });
     
-    // Pastikan video elemen part 6 kembali terlihat dan skala normal jika sebelumnya sempat menghilang/dikecilkan
-    const elElemen6 = document.getElementById('video-elemen-part6');
-    if (elElemen6) {
-        elElemen6.removeAttribute('animation__scaledown');
-        elElemen6.setAttribute('scale', '1 1 1');
-        elElemen6.setAttribute('visible', true);
-    }
 
     const playPromises = videos.part6.map(async (v) => {
         if (!v) return;
@@ -74,87 +67,9 @@ async function startPart6Videos() {
     });
     await Promise.all(playPromises);
     
-    // 3. TEKNIK FREEZE FRAME (khusus elemen-part6: jangan difreeze, tapi sembunyikan dengan animasi scale-down saat selesai 10s)
+    // 3. TEKNIK FREEZE FRAME
     videos.part6.forEach(v => {
         if (!v) return;
-
-        if (v.id === 'vid-elemen-part6') {
-            if (v._cleanupFade) {
-                v._cleanupFade();
-            }
-
-            let isFadingOut = false;
-            let fadeTimeout = null;
-            let activeEl = null;
-
-            const finalizeHide = () => {
-                if (fadeTimeout) {
-                    clearTimeout(fadeTimeout);
-                    fadeTimeout = null;
-                }
-                if (activeEl) {
-                    activeEl.removeEventListener('animationcomplete__scaledown', finalizeHide);
-                    activeEl.setAttribute('visible', false);
-                    activeEl.setAttribute('scale', '1 1 1');
-                    activeEl.removeAttribute('animation__scaledown');
-                }
-                v.pause();
-                console.log('✨ [Part 6] Video #vid-elemen-part6 selesai durasi (10s) dan telah menghilang dengan animasi scale-down.');
-            };
-
-            const hideElemen = () => {
-                if (isFadingOut) return;
-                isFadingOut = true;
-
-                const el = document.getElementById('video-elemen-part6');
-                activeEl = el;
-                if (!el) {
-                    v.pause();
-                    return;
-                }
-
-                // Animasi fade out scale-down (mengecil halus dari 1 1 1 ke 0 0 0)
-                const animDuration = 600;
-                el.removeAttribute('animation__scaledown');
-                el.setAttribute('animation__scaledown', {
-                    property: 'scale',
-                    from: '1 1 1',
-                    to: '0 0 0',
-                    dur: animDuration,
-                    easing: 'easeInQuad'
-                });
-
-                el.addEventListener('animationcomplete__scaledown', finalizeHide, { once: true });
-                fadeTimeout = setTimeout(finalizeHide, animDuration + 50);
-            };
-
-            const handleElemenTimeUpdate = function() {
-                // Mulai animasi fade out scale-down ~0.70 detik sebelum durasi video selesai
-                if (this.duration && (this.duration - this.currentTime <= 0.70)) {
-                    this.removeEventListener('timeupdate', handleElemenTimeUpdate);
-                    hideElemen();
-                }
-            };
-
-            const onEnded = () => hideElemen();
-
-            v.addEventListener('ended', onEnded, { once: true });
-            v.addEventListener('timeupdate', handleElemenTimeUpdate);
-
-            v._cleanupFade = () => {
-                if (fadeTimeout) {
-                    clearTimeout(fadeTimeout);
-                    fadeTimeout = null;
-                }
-                if (activeEl) {
-                    activeEl.removeEventListener('animationcomplete__scaledown', finalizeHide);
-                    activeEl.removeAttribute('animation__scaledown');
-                }
-                v.removeEventListener('timeupdate', handleElemenTimeUpdate);
-                v.removeEventListener('ended', onEnded);
-            };
-            return;
-        }
 
         v.addEventListener('timeupdate', function preventBlackScreen() {
             if (this.duration && (this.duration - this.currentTime <= 0.5)) {
@@ -207,15 +122,6 @@ async function startPart6Videos() {
         if (hasFinished) return;
         hasFinished = true;
         clearTimeout(safetyTimer);
-
-        const vElemen = document.getElementById('vid-elemen-part6');
-        if (vElemen && vElemen._cleanupFade) vElemen._cleanupFade();
-        const elElemen = document.getElementById('video-elemen-part6');
-        if (elElemen) {
-            elElemen.removeAttribute('animation__scaledown');
-            elElemen.setAttribute('scale', '1 1 1');
-            elElemen.setAttribute('visible', false);
-        }
 
         console.log('✅ [Part 6] Selesai! Video dibersihkan.');
         state.isPlaying = false;
