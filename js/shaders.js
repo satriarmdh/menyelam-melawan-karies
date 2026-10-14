@@ -1030,8 +1030,15 @@ AFRAME.registerShader('chromakey-gray', {
 
                 void main() {
                     vec4 color = texture2D(tex, vUv);
+                    float maxRGB = max(max(color.r, color.g), color.b);
 
-                    // Target background color abu-abu/slate elemen-part6 (RGB: 73, 94, 107 / #495E6B)
+                    // Pengaman mutlak: Jika video texture belum siap / hitam / kosong (readyState < 2), buat 100% transparan
+                    if (maxRGB < 0.03) {
+                        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+                        return;
+                    }
+
+                    // Target background color abu-abu/slate elemen-part1 (RGB: 73, 94, 107 / #495E6B)
                     // Normalisasi: 73.0/255.0 = 0.28627, 94.0/255.0 = 0.36863, 107.0/255.0 = 0.41961
                     vec3 keyColor = vec3(0.28627, 0.36863, 0.41961);
                     float dist = distance(color.rgb, keyColor);
@@ -1050,10 +1057,6 @@ AFRAME.registerShader('chromakey-gray', {
                     float edgeFade = smoothstep(0.0, edgeMargin, vUv.x) * smoothstep(1.0, 1.0 - edgeMargin, vUv.x)
                                    * smoothstep(0.0, edgeMargin, vUv.y) * smoothstep(1.0, 1.0 - edgeMargin, vUv.y);
                     alpha *= edgeFade;
-
-                    // Perlindungan area gelap / outline teks dan mata
-                    float darkFactor = smoothstep(0.02, 0.08, max(max(color.r, color.g), color.b));
-                    alpha = mix(1.0, alpha, darkFactor);
 
                     vec3 finalColor = color.rgb;
 

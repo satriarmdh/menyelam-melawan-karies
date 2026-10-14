@@ -11,7 +11,7 @@
 
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <script src="./js/shaders.js"></script>
+    <script src="./js/shaders.js?v=20261014b"></script>
     <script>
         if (typeof AFRAME !== 'undefined') {
             AFRAME.registerComponent('quiz-next-trigger', {
@@ -168,7 +168,7 @@
                 <a-video id="video-muntah-part1-v1" src="#vid-muntah-part1-v1" position="0 0 0.3" height="1" width="1"
                     material="shader: chromakey-blue; src: #vid-muntah-part1-v1; transparent: true; side: double"></a-video>
                 <a-video id="video-elemen-part1" src="#vid-elemen-part1" position="0 0 0.35" height="1" width="1"
-                    material="shader: chromakey-gray; src: #vid-elemen-part1; transparent: true; side: double"></a-video>
+                    material="shader: chromakey-gray; src: #vid-elemen-part1; transparent: true; side: double" visible="false"></a-video>
             </a-entity>
         </a-entity>
 

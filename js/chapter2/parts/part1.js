@@ -53,12 +53,31 @@ async function startPart1Videos() {
         }
     });
 
-    // Pastikan video elemen part 1 kembali terlihat dan skala normal jika sebelumnya sempat menghilang/dikecilkan
+    // Pastikan video elemen part 1 dalam state bersih (sembunyi sampai frame pertama siap terputar)
     const elElemen1 = document.getElementById('video-elemen-part1');
+    const vElemen1 = document.getElementById('vid-elemen-part1');
     if (elElemen1) {
         elElemen1.removeAttribute('animation__scaledown');
         elElemen1.setAttribute('scale', '1 1 1');
-        elElemen1.setAttribute('visible', true);
+        elElemen1.setAttribute('visible', false);
+    }
+
+    if (vElemen1 && elElemen1) {
+        const showElemenWhenReady = () => {
+            if (state.currentPart === 1 && state.isPlaying) {
+                elElemen1.setAttribute('visible', true);
+            }
+        };
+        if (vElemen1.currentTime > 0.05) {
+            showElemenWhenReady();
+        } else {
+            vElemen1.addEventListener('timeupdate', function onFirstTick() {
+                if (this.currentTime > 0.05) {
+                    this.removeEventListener('timeupdate', onFirstTick);
+                    showElemenWhenReady();
+                }
+            });
+        }
     }
 
     // Tampilkan container AR langsung agar output visual tidak hilang/blank
