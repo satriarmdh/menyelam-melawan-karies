@@ -4,11 +4,12 @@
 (function () {
     const isChapter1 = window.location.pathname.includes('chapter1');
     const isChapter2 = window.location.pathname.includes('chapter2');
+    const isChapter3 = window.location.pathname.includes('chapter3');
 
-    if (!isChapter1 && !isChapter2) return;
+    if (!isChapter1 && !isChapter2 && !isChapter3) return;
 
     const maxParts = 8;
-    const chapterName = isChapter1 ? 'Chapter 1' : 'Chapter 2';
+    const chapterName = isChapter1 ? 'Chapter 1' : (isChapter2 ? 'Chapter 2' : 'Chapter 3');
 
     // Inject styles
     const style = document.createElement('style');
@@ -167,7 +168,7 @@
             ${gridHtml}
         </div>
         <div class="dev-test-actions">
-            ${isChapter1 ? '<a href="./quiz.html" class="dev-test-sub-btn">🐚 Lompat Langsung ke Kuis</a>' : '<button class="dev-test-sub-btn" id="devJumpQuiz2">🐚 Lompat Langsung ke Kuis Bab 2</button>'}
+            ${isChapter1 ? '<a href="./quiz.html" class="dev-test-sub-btn">🐚 Lompat Langsung ke Kuis</a>' : `<button class="dev-test-sub-btn" id="devJumpQuizSeamless">🐚 Lompat Langsung ke Kuis (${chapterName})</button>`}
             <button class="dev-test-sub-btn" id="devUnlockAll">🔓 Buka & Izinkan Semua Marker</button>
             <a href="./test.html" class="dev-test-sub-btn">📋 Buka Halaman Test Hub Lengkap</a>
         </div>
@@ -231,10 +232,10 @@
         });
     }
 
-    // Jump to Quiz for Chapter 2
-    const devJumpQuiz2 = document.getElementById('devJumpQuiz2');
-    if (devJumpQuiz2) {
-        devJumpQuiz2.addEventListener('click', (e) => {
+    // Jump to Quiz for Chapter 2 & Chapter 3
+    const devJumpQuizSeamless = document.getElementById('devJumpQuizSeamless');
+    if (devJumpQuizSeamless) {
+        devJumpQuizSeamless.addEventListener('click', (e) => {
             e.stopPropagation();
             panel.classList.remove('show');
             const startBtn = document.getElementById('startButton');

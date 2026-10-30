@@ -1112,5 +1112,202 @@ if (AFRAME.shaders && AFRAME.shaders['chromakey-gray']) {
     AFRAME.shaders['chromakey-abu'] = AFRAME.shaders['chromakey-gray'];
 }
 
+// CHROMAKEY Shader - Khusus Pure Yellow Screen (Chapter 3 Part 5 TEKS #FDF600 / RGB: ~253, 246, 0)
+AFRAME.registerShader('chromakey-yellow', {
+    schema: { src: { type: 'map' } },
+    init: function (data) {
+        let el = data.src;
+        if (typeof el === 'string') {
+            el = document.querySelector(el) || document.getElementById(el.replace('#', ''));
+        }
+        const videoTexture = new THREE.VideoTexture(el || data.src);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBAFormat;
+        videoTexture.generateMipmaps = false;
+        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+        this.material = new THREE.ShaderMaterial({
+            uniforms: { tex: { value: videoTexture } },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tex;
+                varying vec2 vUv;
+
+                void main() {
+                    vec4 color = texture2D(tex, vUv);
+
+                    // Deteksi warna Kuning Cerah (#FDF600 / RGB ~253, 246, 0):
+                    // - Karakteristik: R & G sangat tinggi (> 0.80), B sangat rendah (< 0.25)
+                    float rbDiff = color.r - color.b;
+                    float gbDiff = color.g - color.b;
+
+                    float isYellow = smoothstep(0.55, 0.75, rbDiff) * smoothstep(0.55, 0.75, gbDiff) * smoothstep(0.70, 0.85, min(color.r, color.g)) * (1.0 - smoothstep(0.18, 0.32, color.b));
+
+                    if (color.r > 0.82 && color.g > 0.78 && color.b < 0.25) {
+                        isYellow = 1.0;
+                    }
+
+                    // Perlindungan area gelap / outline teks
+                    float darkProtection = smoothstep(0.04, 0.16, max(max(color.r, color.g), color.b));
+                    isYellow *= darkProtection;
+
+                    float alpha = 1.0 - isYellow;
+                    vec3 finalColor = color.rgb;
+
+                    // Despill lembut di tepian
+                    if (alpha > 0.0 && alpha < 0.95 && isYellow > 0.05) {
+                        float despillStrength = (1.0 - alpha) * 0.8;
+                        float avg = (finalColor.r + finalColor.g) * 0.5;
+                        finalColor.rg = mix(finalColor.rg, vec2(avg), despillStrength);
+                    }
+
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            blending: THREE.NormalBlending
+        });
+        this.material.map = videoTexture;
+    },
+    update: function (data) {
+        if (data.src) {
+            let el = data.src;
+            if (typeof el === 'string') el = document.querySelector(el);
+            if (el) {
+                const videoTexture = new THREE.VideoTexture(el);
+                videoTexture.minFilter = THREE.LinearFilter;
+                videoTexture.magFilter = THREE.LinearFilter;
+                videoTexture.format = THREE.RGBAFormat;
+                videoTexture.generateMipmaps = false;
+                videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+                videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+                if (this.material && this.material.uniforms && this.material.uniforms.tex) {
+                    this.material.uniforms.tex.value = videoTexture;
+                    this.material.map = videoTexture;
+                    this.material.needsUpdate = true;
+                }
+            }
+        }
+    },
+    tick: function () {
+        if (this.material && this.material.uniforms && this.material.uniforms.tex && this.material.uniforms.tex.value) {
+            const t = this.material.uniforms.tex.value;
+            if (t.image && t.image.readyState >= 2 && !t.image.paused) {
+                t.needsUpdate = true;
+            }
+        }
+    }
+});
+
+// CHROMAKEY Shader - Khusus Mauve / Muted Violet Screen (Chapter 3 Part 6 & 7 TEKS #AC699D / RGB: ~172, 105, 157)
+AFRAME.registerShader('chromakey-mauve', {
+    schema: { src: { type: 'map' } },
+    init: function (data) {
+        let el = data.src;
+        if (typeof el === 'string') {
+            el = document.querySelector(el) || document.getElementById(el.replace('#', ''));
+        }
+        const videoTexture = new THREE.VideoTexture(el || data.src);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBAFormat;
+        videoTexture.generateMipmaps = false;
+        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+        this.material = new THREE.ShaderMaterial({
+            uniforms: { tex: { value: videoTexture } },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tex;
+                varying vec2 vUv;
+
+                void main() {
+                    vec4 color = texture2D(tex, vUv);
+
+                    // Deteksi warna Mauve / Ungu Mawar (#AC699D / RGB ~172, 105, 157):
+                    // - Karakteristik: R & B seimbang dan lebih tinggi dari G (selisih R-G ~ 0.26, B-G ~ 0.20)
+                    // - G bernilai sedang (~0.35 - 0.48)
+                    float rgDiff = color.r - color.g;
+                    float bgDiff = color.b - color.g;
+                    float rbBalance = 1.0 - abs(color.r - color.b);
+
+                    float isMauve = smoothstep(0.12, 0.22, rgDiff) * smoothstep(0.08, 0.18, bgDiff) * smoothstep(0.75, 0.90, rbBalance) * smoothstep(0.20, 0.30, color.g) * (1.0 - smoothstep(0.48, 0.58, color.g));
+
+                    if (rgDiff > 0.16 && bgDiff > 0.12 && rbBalance > 0.82 && color.g > 0.28 && color.g < 0.50) {
+                        isMauve = 1.0;
+                    }
+
+                    // Perlindungan area gelap / outline teks
+                    float darkProtection = smoothstep(0.04, 0.16, max(max(color.r, color.g), color.b));
+                    isMauve *= darkProtection;
+
+                    float alpha = 1.0 - isMauve;
+                    vec3 finalColor = color.rgb;
+
+                    // Despill lembut di tepian
+                    if (alpha > 0.0 && alpha < 0.95 && isMauve > 0.05) {
+                        float despillStrength = (1.0 - alpha) * 0.8;
+                        float avg = (finalColor.r + finalColor.b) * 0.5;
+                        finalColor.g = mix(finalColor.g, avg, despillStrength);
+                    }
+
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            blending: THREE.NormalBlending
+        });
+        this.material.map = videoTexture;
+    },
+    update: function (data) {
+        if (data.src) {
+            let el = data.src;
+            if (typeof el === 'string') el = document.querySelector(el);
+            if (el) {
+                const videoTexture = new THREE.VideoTexture(el);
+                videoTexture.minFilter = THREE.LinearFilter;
+                videoTexture.magFilter = THREE.LinearFilter;
+                videoTexture.format = THREE.RGBAFormat;
+                videoTexture.generateMipmaps = false;
+                videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+                videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+                if (this.material && this.material.uniforms && this.material.uniforms.tex) {
+                    this.material.uniforms.tex.value = videoTexture;
+                    this.material.map = videoTexture;
+                    this.material.needsUpdate = true;
+                }
+            }
+        }
+    },
+    tick: function () {
+        if (this.material && this.material.uniforms && this.material.uniforms.tex && this.material.uniforms.tex.value) {
+            const t = this.material.uniforms.tex.value;
+            if (t.image && t.image.readyState >= 2 && !t.image.paused) {
+                t.needsUpdate = true;
+            }
+        }
+    }
+});
+
+
 
 
