@@ -1,5 +1,5 @@
 import { dom, videos } from './state.js';
-import { getMediaUrl } from '../cdnConfig.js';
+import { getMediaUrl } from '../cdnConfig.js?v=20261102b';
 import { preloadAudio } from '../audioManager.js';
 
 export const PART_CONFIG = {

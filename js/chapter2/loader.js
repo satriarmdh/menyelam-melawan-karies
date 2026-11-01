@@ -1,8 +1,8 @@
 import { dom, videos } from './state.js';
-import { getMediaUrl } from '../cdnConfig.js';
+import { getMediaUrl } from '../cdnConfig.js?v=20261102b';
 import { preloadAudio } from '../audioManager.js';
 
-// Konfigurasi URL Bersih via Supabase CDN
+// Konfigurasi URL Media Bab 2
 export const PART_CONFIG = {
     1: {
         videos: [
