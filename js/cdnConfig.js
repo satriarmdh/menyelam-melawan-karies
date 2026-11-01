@@ -1,10 +1,10 @@
 // Konfigurasi Cloud Storage CDN (Supabase) untuk Media Web AR
-export const CDN_BASE = "https://wwlishzxhmshagfuywyd.supabase.co/storage/v1/object/public/ar-assets";
+export const CDN_BASE = "https://pub-0ccbad8d976b4ef88dc10936c8837b7f.r2.dev";
 
 /**
  * Mengubah path relatif lokal menjadi URL publik CDN Supabase.
  * Contoh: './compressed_ultra-videos/chapter1/part1/LAUT-v1.mp4'
- *      -> 'https://wwlishzxhmshagfuywyd.supabase.co/storage/v1/object/public/ar-assets/compressed_ultra-videos/chapter1/part1/LAUT-v1.mp4'
+ *      -> 'https://pub-0ccbad8d976b4ef88dc10936c8837b7f.r2.dev/compressed_ultra-videos/chapter1/part1/LAUT-v1.mp4'
  */
 export function getMediaUrl(path) {
     if (!path) return path;
