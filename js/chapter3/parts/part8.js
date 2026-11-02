@@ -1,5 +1,5 @@
 import { state, dom, videos } from '../state.js';
-import { fadeInContainer, fadeOutContainer, hideAllContainersExcept, isContainerVisible } from '../utils.js';
+import { fadeInContainer, fadeOutContainer, fadeAudioOut, hideAllContainersExcept, isContainerVisible } from '../utils.js';
 import { ensurePartLoaded } from '../loader.js';
 
 let isPlayButtonActive = false;
@@ -285,6 +285,7 @@ export async function playPart8() {
     
     hideAllContainersExcept(dom.containerPart8);
     hidePlayPart8Button();
+    fadeAudioOut(dom.soundV7, 300);
     
     const allContainers = [
         dom.containerPart1, dom.containerPart2, dom.containerPart3,

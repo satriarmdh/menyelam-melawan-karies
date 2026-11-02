@@ -1,6 +1,6 @@
 import { state, dom, videos } from '../state.js';
-import { fadeInContainer, fadeOutContainer, hideAllContainersExcept, isContainerVisible } from '../utils.js';
-import { preloadPart, releasePartVideos } from '../loader.js';
+import { fadeInContainer, fadeOutContainer, fadeAudioOut, hideAllContainersExcept, isContainerVisible } from '../utils.js';
+import { ensurePartLoaded, preloadPart, releasePartVideos } from '../loader.js';
 
 export async function playPart4() {
     if (state.isPlaying || !state.part3Finished || (state.currentPart !== 3 && state.currentPart !== 4) || state.isTransitioning) {
@@ -8,6 +8,7 @@ export async function playPart4() {
         return;
     }
 
+    ensurePartLoaded(4);
     preloadPart(5);
 
     state.isMarkerLocked = true;
@@ -16,6 +17,7 @@ export async function playPart4() {
     console.log('🔒 [Part 4] Marker LOCKED');
 
     hideAllContainersExcept(dom.containerPart4);
+    fadeAudioOut(dom.soundV3, 300);
 
     const allContainers = [dom.containerPart1, dom.containerPart2, dom.containerPart3, dom.containerPart5, dom.containerPart6, dom.containerPart7];
     const previousContainer = allContainers.find(c => c && isContainerVisible(c));
@@ -111,10 +113,10 @@ async function startPart4Videos() {
 
         releasePartVideos(4);
         preloadPart(5);
-
-        if (dom.containerPart4) {
+            if (dom.containerPart4) {
             fadeOutContainer(dom.containerPart4, 250, () => {
                 releasePartVideos(4);
+        preloadPart(5);
             });
         }
 

@@ -130,6 +130,19 @@ export function preloadPart(partNum) {
  * Memastikan part yang akan diputar sudah memiliki src
  */
 export function ensurePartLoaded(partNum) {
+    const config = PART_CONFIG[partNum];
+    if (!config) return;
+
+    if (config.audio) {
+        const audioSrc = resolveUrl(config.audio);
+        preloadAudio(audioSrc);
+        const aEl = document.getElementById(config.audio.id);
+        if (aEl && (!aEl.src || aEl.src === '' || aEl.src.endsWith('#'))) {
+            aEl.src = audioSrc;
+            aEl.preload = 'none';
+        }
+    }
+
     preloadPart(partNum);
 }
 
@@ -149,7 +162,10 @@ export function releasePartVideos(partNum) {
     }
 }
 
-// Preload audio Part 1 segera di awal agar siap putar dengan 0ms latensi
+// Preload audio Part 1 & Part 2 segera di awal agar siap putar dengan 0ms latensi
 if (PART_CONFIG[1] && PART_CONFIG[1].audio) {
     preloadAudio(resolveUrl(PART_CONFIG[1].audio));
+}
+if (PART_CONFIG[2] && PART_CONFIG[2].audio) {
+    preloadAudio(resolveUrl(PART_CONFIG[2].audio));
 }

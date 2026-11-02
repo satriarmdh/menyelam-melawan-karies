@@ -46,14 +46,30 @@ export function unlockAudioContext() {
 
 const loadingPromises = new Map();
 
+function normalizeAudioUrl(url) {
+    if (!url) return '';
+    try {
+        return new URL(url, (typeof window !== 'undefined' ? window.location.href : 'http://localhost')).href;
+    } catch (e) {
+        return url;
+    }
+}
+
 /**
  * Mengambil dan mendecode file audio ke AudioBuffer (dengan cache memori)
  * Kompatibel dengan semua versi WebKit / Safari (Promise & Callback syntax)
  */
 export async function loadAudioBuffer(url) {
     if (!url) return null;
+    const normUrl = normalizeAudioUrl(url);
+    if (audioBufferCache.has(normUrl)) {
+        return audioBufferCache.get(normUrl);
+    }
     if (audioBufferCache.has(url)) {
         return audioBufferCache.get(url);
+    }
+    if (loadingPromises.has(normUrl)) {
+        return loadingPromises.get(normUrl);
     }
     if (loadingPromises.has(url)) {
         return loadingPromises.get(url);
@@ -104,6 +120,7 @@ export async function loadAudioBuffer(url) {
                 }
             });
 
+            audioBufferCache.set(normUrl, audioBuffer);
             audioBufferCache.set(url, audioBuffer);
             return audioBuffer;
         } catch (err) {
@@ -112,10 +129,12 @@ export async function loadAudioBuffer(url) {
         }
     })();
 
+    loadingPromises.set(normUrl, promise);
     loadingPromises.set(url, promise);
     try {
         return await promise;
     } finally {
+        loadingPromises.delete(normUrl);
         loadingPromises.delete(url);
     }
 }

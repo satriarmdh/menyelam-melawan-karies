@@ -16,8 +16,9 @@ import './quiz.js';
 // -----------------------------------------------------------------------------
 // 1. PRIORITAS BUFFERING: MUAT HANYA PART 1 DI AWAL (LAZY LOADING)
 // -----------------------------------------------------------------------------
-console.log("🚀 [Chapter 3] Memulai pemuatan prioritas Part 1...");
+console.log("🚀 [Chapter 3] Memulai pemuatan prioritas Part 1 & Part 2...");
 preloadPart(1);
+preloadPart(2);
 
 // -----------------------------------------------------------------------------
 // Kamera Streaming Helper (Cegah Black Screen & Suara Memulai Duluan)
